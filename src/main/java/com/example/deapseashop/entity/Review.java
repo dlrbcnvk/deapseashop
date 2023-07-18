@@ -3,11 +3,9 @@ package com.example.deapseashop.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 
-import java.util.List;
-
 @Entity
 @Getter
-public class OrderItemReview {
+public class Review {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,14 +15,14 @@ public class OrderItemReview {
     @JoinColumn(name = "reviews")
     private Member member;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "review")
     private OrderItem orderItem;
 
     private String review;
 
-    public OrderItemReview() { }
+    public Review() { }
 
-    public OrderItemReview(Member member, OrderItem orderItem, String review) {
+    public Review(Member member, OrderItem orderItem, String review) {
         this.member = member;
         this.orderItem = orderItem;
         this.review = review;

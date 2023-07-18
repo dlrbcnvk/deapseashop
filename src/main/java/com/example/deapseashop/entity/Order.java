@@ -23,4 +23,29 @@ public class Order {
     private List<OrderItem> orderItems = new ArrayList<>();
 
     public Order() { }
+
+    // 연관관계 메서드
+    private void setMember(Member member) {
+        this.member = member;
+        if (!member.getOrders().contains(this)) {
+            member.getOrders().add(this);
+        }
+    }
+
+    // 생성 메서드
+    public static Order createOrder(Member member, List<OrderItem> orderItems) {
+        Order order = new Order();
+        order.setMember(member);
+        for (OrderItem orderItem : orderItems) {
+            order.addOrderItem(orderItem);
+        }
+        return order;
+    }
+
+    private void addOrderItem(OrderItem orderItem) {
+        orderItems.add(orderItem);
+        orderItem.setOrder(this);
+    }
+
+
 }

@@ -31,6 +31,7 @@ dependencies {
 
 	// lombok
 	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
 
 	// live reload
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
@@ -41,9 +42,12 @@ dependencies {
 	// H2 Database
 	runtimeOnly 'com.h2database:h2:1.4.192'
 
-	// lombok in test
-	annotationProcessor 'org.projectlombok:lombok'
+	// test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	// lombok in test
+	testCompileOnly 'org.projectlombok:lombok' // 테스트 의존성 추가
+	testAnnotationProcessor 'org.projectlombok:lombok' // 테스트 의존성 추가
 }
 
 tasks.named('test') {

@@ -1,5 +1,6 @@
 package com.example.deapseashop.entity;
 
+import com.example.deapseashop.exception.NotEnoughStockException;
 import jakarta.persistence.*;
 import lombok.Getter;
 
@@ -21,8 +22,8 @@ public class Item {
     @Column(name = "price")
     private int price;
 
-    @Column(name = "quantity")
-    private int quantity;
+    @Column(name = "stock")
+    private int stock;
 
     @OneToMany(mappedBy = "item", fetch = FetchType.LAZY)
     private List<OrderItem> orderItems = new ArrayList<>();
@@ -45,10 +46,17 @@ public class Item {
     }
 
     // 생성자
-    public Item(String name, int price, int quantity, Member seller) {
+    public Item(String name, int price, int stock, Member seller) {
         this.name = name;
         this.price = price;
-        this.quantity = quantity;
+        this.stock = stock;
         setSeller(seller);
+    }
+
+    public void decreaseStock(int quantity) {
+        int restStock = this.stock - quantity;
+        if (restStock < 0) {
+            throw new NotEnoughStockException("재고 부족");
+        }
     }
 }
