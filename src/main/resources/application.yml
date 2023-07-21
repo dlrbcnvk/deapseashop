@@ -1,0 +1,64 @@
+server:
+  servlet:
+    session:
+      # HttpSession 은 세션 생성 시점이 아니라 사용자가 서버에 최근에 요청한 시간을 기준으로 세션을 유지해주는 방식을 사용함.
+      timeout: 30
+      # 세션id 값을 전달하는 데에 있어 URL 전달 방식을 끄고 항상 쿠키를 통해서만 세션을 유지하고 싶을 때
+      tracking-modes: cookie
+
+# local
+spring:
+  datasource:
+    url: jdbc:h2:tcp://localhost/~/deapseashop
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        show_sql: true
+    open-in-view: false
+
+  data:
+    redis:
+      host: localhost
+      password:
+
+      session:
+        port: 9000
+
+  session:
+    redis:
+      flush-mode: on_save
+      namespace: spring:session
+
+
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    cache: false
+
+  mvc:
+    static-path-pattern: /static/**
+
+  devtools:
+    livereload:
+      enabled: true
+    restart:
+      enabled: true
+
+
+
+logging:
+  level:
+    # JPA SQL
+    org.hibernate.SQL: debug
+
+    org.springframework.transaction.interceptor: TRACE
+    org.springframework.jdbc.DataSourceTransactionManager: DEBUG
+    # JPA log
+    org.springframework.orm.JpaTransactionManager: DEBUG
+    org.hibernate.resource.transaction: DEBUG
