@@ -1,6 +1,8 @@
 package com.example.deapseashop.exhandler;
 
+import com.example.deapseashop.exceptions.DuplicateEmailAndUsernameException;
 import com.example.deapseashop.exceptions.DuplicateEmailException;
+import com.example.deapseashop.exceptions.DuplicateUsernameException;
 import com.example.deapseashop.exceptions.InvalidPasswordException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,6 +26,19 @@ public class ExControllerAdvice {
         return new ErrorResult("DuplicateEmailException", e.getMessage());
     }
 
+    @ExceptionHandler(DuplicateUsernameException.class)
+    public ErrorResult duplicateUsernameExHandle(DuplicateUsernameException e) {
+        log.error("[exceptionHandle] ex", e);
+        return new ErrorResult("DuplicateEmailException", e.getMessage());
+    }
+
+    @ExceptionHandler(DuplicateEmailAndUsernameException.class)
+    public ErrorResult duplicateEmailAndUsernameExHandle(DuplicateEmailAndUsernameException e) {
+        log.error("[exceptionHandle] ex", e);
+        return new ErrorResult("DuplicateEmailAndUsernameException", e.getMessage());
+    }
+
+    
     @ExceptionHandler(InvalidPasswordException.class)
     public ErrorResult invalidPasswordExHandle(InvalidPasswordException e) {
         log.error("[exceptionHandle] ex", e);

@@ -19,7 +19,7 @@ spring:
       ddl-auto: create
     properties:
       hibernate:
-        show_sql: true
+        format_sql: true
     open-in-view: false
 
   data:
@@ -57,8 +57,8 @@ logging:
     # JPA SQL
     org.hibernate.SQL: debug
 
-    org.springframework.transaction.interceptor: TRACE
-    org.springframework.jdbc.DataSourceTransactionManager: DEBUG
+#    org.springframework.transaction.interceptor: TRACE
+#    org.springframework.jdbc.DataSourceTransactionManager: DEBUG
     # JPA log
-    org.springframework.orm.JpaTransactionManager: DEBUG
-    org.hibernate.resource.transaction: DEBUG
+#    org.springframework.orm.JpaTransactionManager: DEBUG
+#    org.hibernate.resource.transaction: DEBUG

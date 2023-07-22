@@ -19,17 +19,13 @@ public class UserController {
     @PostMapping("/register")
     public String register(UserJoinRequest joinRequest) {
         /**
-         * 이메일 중복되어서 회원가입 실패하는 경우 서비스로부터 DuplicateEmailException 받음
-         * @ExceptionHandler 통해서 json 으로 던짐
+         * 이메일 또는 이름이 중복되어서 회원가입 실패하는 경우 서비스로부터 RuntimeException 받음
+         * 이메일, 이름 모두 중복 -> DuplicateEmailAndUsernameException
+         * 이메일 중복 -> DuplicateEmailException
+         * 이름 중복 -> DuplicateUsernameException
+         * @ExceptionHandler 통해서 json 으로 정상 응답
          */
         userService.join(joinRequest);
-
-        /**
-         * 회원가입 시에는 세션 유지할 필요 없을 수도 있는데
-         * 처음부터 세션 있다고 가정.
-         * 회원가입 하기 전에 익명사용자로서 검색을 해서 검색기록이 세션에 쌓였다고 가정.
-         */
-//        session.invalidate();
 
         return "회원가입 성공!";
     }

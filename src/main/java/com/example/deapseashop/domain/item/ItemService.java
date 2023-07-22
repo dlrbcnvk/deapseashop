@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -29,15 +30,27 @@ public class ItemService {
         return itemRepository.findAll();
     }
 
+    public List<ItemDto> findAllWithSellerName() {
+        return itemRepository.findAllWithSeller().stream()
+                .map(itemEntity -> new ItemDto(itemEntity))
+                .collect(Collectors.toList());
+    }
+
+    public List<ItemDto> findAllWithSellerNameNotLoginUser(String email) {
+        return itemRepository.findAllWithSellerNotLoginUser(email).stream()
+                .map(itemEntity -> new ItemDto(itemEntity))
+                .collect(Collectors.toList());
+    }
+
     @Transactional
-    public Long register(ItemRegisterDto itemDto, String email) {
+    public Long register(ItemRegisterDto itemDto) {
         /**
          * 서비스 오기 전에 컨트롤러에서 본인이 맞는지 그리고 로그인되어있는지 확인해야 함
          * 영속성 컨텍스트 위해 한번 더 조회
          * 컨트롤러부터 트랜잭션을 시작하면 영속성이 계속 이어질 것이니 쿼리를 하나라도 더 줄일 수 있지 않을까 생각도 든다.
          * 고민을 좀 더 해볼 것
          */
-        Optional<UserEntity> findUser = userRepository.findByEmail(email);
+        Optional<UserEntity> findUser = userRepository.findByEmail(itemDto.getSellerEmail());
         if (findUser.isEmpty()) {
             throw new UserNotFoundException("회원을 찾을 수 없습니다.");
         }
@@ -51,9 +64,6 @@ public class ItemService {
             throw new DuplicateItemException("같은 이름의 상품이 이미 등록되어 있습니다.");
         }
         itemRepository.save(item);
-
-        List<ItemEntity> sellingItems = user.getSellingItems();
-        log.info("At ItemService.register() after save(), sellingItems.size()={}", sellingItems.size());
 
         return item.getId();
     }
@@ -89,6 +99,14 @@ public class ItemService {
             throw new UserNotFoundException("회원을 찾을 수 없습니다.");
         }
         return itemRepository.findBySeller(userOpt.get());
+    }
+
+    public List<ItemEntity> findByNotSeller(String email) {
+        Optional<UserEntity> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            throw new UserNotFoundException("회원을 찾을 수 없습니다.");
+        }
+        return itemRepository.findBySellerNot(userOpt.get());
     }
 
     @Transactional

@@ -24,7 +24,9 @@ public class UserEntity extends BaseEntity {
     private Long id;
 
     /**
-     * business key: email
+     * business key: email, username
+     * email 도 겹치면 안 되고
+     * username 도 겹치면 안 됨
      */
     @NotNull
     private String email;

@@ -25,7 +25,7 @@ public class ItemEntity extends BaseEntity {
     private int price;
     private int quantity;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "user_id")
     private UserEntity seller;
 

@@ -10,4 +10,5 @@ public class ItemRegisterDto {
     private String itemName;
     private int price;
     private int quantity;
+    private String sellerEmail;
 }

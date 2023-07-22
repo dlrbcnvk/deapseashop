@@ -71,6 +71,9 @@ public class LoginController {
         return "로그아웃 성공";
     }
 
+    /**
+     * 에러가 아닌 이상, 클라이언트에게 동일한 포맷으로 응답하기 위한 inner class
+     */
     @Getter
     @AllArgsConstructor
     @RequiredArgsConstructor

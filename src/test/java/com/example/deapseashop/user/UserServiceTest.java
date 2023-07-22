@@ -1,11 +1,17 @@
 package com.example.deapseashop.user;
 
+import com.example.deapseashop.domain.item.ItemRegisterDto;
+import com.example.deapseashop.domain.item.ItemRepository;
+import com.example.deapseashop.domain.item.ItemService;
 import com.example.deapseashop.domain.user.dtos.UserJoinRequest;
 import com.example.deapseashop.domain.user.entities.UserEntity;
+import com.example.deapseashop.domain.user.repositories.UserRepository;
 import com.example.deapseashop.domain.user.services.UserService;
-import com.example.deapseashop.exceptions.DuplicateEmailException;
+import com.example.deapseashop.exceptions.*;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,19 +27,37 @@ public class UserServiceTest {
     @Autowired
     public UserService userService;
 
+    @Autowired
+    public UserRepository userRepository;
+    @Autowired
+    public ItemRepository itemRepository;
+
+    @Autowired
+    public ItemService itemService;
+
+    @AfterEach
+    public void after() {
+        itemRepository.deleteAll();
+        itemRepository.deleteAllInBatch();
+        userRepository.deleteAllInBatch();
+        log.info("delete all items and users after each");
+    }
+
+    @BeforeEach
+    public void before() {
+        itemRepository.deleteAllInBatch();
+        userRepository.deleteAllInBatch();
+        log.info("delete all items and users before each");
+    }
     @Test
     @Rollback
     void 회원가입() {
         // given
-        UserJoinRequest userRequest = UserJoinRequest.builder()
-                .email("test@aaa.com")
-                .password("pass")
-                .username("cho")
-                .build();
+        UserJoinRequest userRequest = userJoinRequest();
         userService.join(userRequest);
 
         // when
-        UserEntity findUser = userService.findByEmail(userRequest.getEmail()).orElseThrow();
+        UserEntity findUser = userService.findByEmail(userRequest.getEmail());
 
         // then
         assertThat(findUser).isNotNull();
@@ -45,15 +69,96 @@ public class UserServiceTest {
     @Test
     @Rollback
     void 회원가입_실패_이메일중복() {
-        UserJoinRequest userRequest = UserJoinRequest.builder()
+        UserJoinRequest userRequest = userJoinRequest();
+        userService.join(userRequest);
+
+        UserJoinRequest userRequest2 = UserJoinRequest.builder()
+                .email(userRequest.getEmail())
+                .password("pass")
+                .username("zzz")
+                .build();
+
+        assertThrows(DuplicateEmailException.class, () -> {
+            userService.join(userRequest2);
+        });
+    }
+
+    @Test
+    @Rollback
+    void 회원가입_실패_이름중복() {
+        UserJoinRequest userRequest = userJoinRequest();
+        userService.join(userRequest);
+
+        UserJoinRequest userRequest2 = UserJoinRequest.builder()
+                .email("bbb@bbb.com")
+                .password("pass")
+                .username("cho")
+                .build();
+
+        assertThrows(DuplicateUsernameException.class, () -> {
+            userService.join(userRequest2);
+        });
+    }
+
+    @Test
+    @Rollback
+    void 회원가입_실패_이메일_이름_모두중복() {
+        UserJoinRequest userRequest = userJoinRequest();
+        userService.join(userRequest);
+
+        UserJoinRequest userRequest2 = UserJoinRequest.builder()
+                .email(userRequest.getEmail())
+                .password("pass")
+                .username(userRequest.getUsername())
+                .build();
+
+        assertThrows(DuplicateEmailAndUsernameException.class, () -> {
+            userService.join(userRequest2);
+        });
+    }
+
+    private UserJoinRequest userJoinRequest() {
+        return UserJoinRequest.builder()
                 .email("test@aaa.com")
                 .password("pass")
                 .username("cho")
                 .build();
-        userService.join(userRequest);
+    }
 
-        assertThrows(DuplicateEmailException.class, () -> {
-            userService.join(userRequest);
-        });
+    @Test
+    @Rollback
+    void 회원삭제_상품없이() {
+        // given
+        UserJoinRequest userJoinRequest = userJoinRequest();
+        userService.join(userJoinRequest);
+
+        // when
+        userService.deleteUser(userJoinRequest.getEmail());
+
+        // then
+        assertThrows(UserNotFoundException.class, () -> userService.findByEmail(userJoinRequest.getEmail()));
+    }
+
+    @Test
+    @Rollback
+    void 회원삭제_상품3개있음() {
+        // given
+        UserJoinRequest userJoinRequest = userJoinRequest();
+        userService.join(userJoinRequest);
+
+        ItemRegisterDto itemDto = new ItemRegisterDto("오브젝트", 40000, 30, userJoinRequest.getEmail());
+        itemService.register(itemDto);
+        ItemRegisterDto itemDto2 = new ItemRegisterDto("쿠버네티스", 40000, 30, userJoinRequest.getEmail());
+        itemService.register(itemDto2);
+        ItemRegisterDto itemDto3 = new ItemRegisterDto("자바자바자바", 40000, 30, userJoinRequest.getEmail());
+        itemService.register(itemDto3);
+
+        // when
+        userService.deleteUser(userJoinRequest.getEmail());
+
+        // then
+        assertThrows(ItemNotFoundException.class,
+                () -> itemService.findByItemNameAndEmail(itemDto.getItemName(), userJoinRequest().getEmail()));
+        assertThrows(UserNotFoundException.class, () -> userService.findByEmail(userJoinRequest.getEmail()));
     }
 }
