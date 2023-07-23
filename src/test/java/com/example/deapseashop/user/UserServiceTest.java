@@ -155,7 +155,7 @@ public class UserServiceTest {
 
         // when
         userService.deleteUser(userJoinRequest.getEmail());
-
+        log.info("deleteUser() end");
         // then
         assertThrows(ItemNotFoundException.class,
                 () -> itemService.findByItemNameAndEmail(itemDto.getItemName(), userJoinRequest().getEmail()));

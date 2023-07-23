@@ -29,9 +29,10 @@ public interface ItemRepository extends JpaRepository<ItemEntity, Long> {
             "where i.seller = u and u.email != :email")
     public List<ItemEntity> findAllWithSellerNotLoginUser(@Param("email") String email);
 
-    // TODO 쿼리 짜야 함
-    @Query("delete from ItemEntity i where i.seller = :user")
-    public void deleteBySeller(@Param("user") UserEntity user);
 
-//    public void deleteBySeller(UserEntity user);
+    // TODO seller 연관 삭제 쿼리 짜야 함
+
+    public void deleteAllBySeller(UserEntity user);
+
+
 }

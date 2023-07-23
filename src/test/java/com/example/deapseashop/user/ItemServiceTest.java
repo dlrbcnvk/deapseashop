@@ -43,14 +43,14 @@ public class ItemServiceTest {
 
     @BeforeEach
     void beforeEach() {
-        userRepository.deleteAll();
         itemRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @AfterEach
     void afterEach() {
-        userRepository.deleteAll();
         itemRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test

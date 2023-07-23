@@ -51,7 +51,6 @@ spring:
       enabled: true
 
 
-
 logging:
   level:
     # JPA SQL
@@ -62,3 +61,12 @@ logging:
     # JPA log
 #    org.springframework.orm.JpaTransactionManager: DEBUG
 #    org.hibernate.resource.transaction: DEBUG
+    com.example.deapseashop.mybatis: trace
+
+
+#MyBatis
+mybatis:
+  type-aliases-package: com.example.deapseashop
+  configuration:
+    map-underscore-to-camel-case: true
+

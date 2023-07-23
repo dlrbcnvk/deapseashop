@@ -1,6 +1,5 @@
 package com.example.deapseashop.domain.user.services;
 
-import com.example.deapseashop.domain.item.ItemEntity;
 import com.example.deapseashop.domain.item.ItemRepository;
 import com.example.deapseashop.domain.user.dtos.UserJoinRequest;
 import com.example.deapseashop.domain.user.entities.UserEntity;
@@ -11,14 +10,13 @@ import com.example.deapseashop.domain.user.repositories.UserRepository;
 import com.example.deapseashop.exceptions.DuplicateUsernameException;
 import com.example.deapseashop.exceptions.UserNotFoundException;
 import com.example.deapseashop.utils.ShaUtils;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +25,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
+    private final EntityManager em;
 
     @Transactional
     public Long join(UserJoinRequest userJoinRequest) {
@@ -54,25 +53,18 @@ public class UserService {
         log.info("deleteUser() start");
         UserEntity findUser = userRepository.findByEmail(email).orElseThrow(
                 () -> new UserNotFoundException("회원을 찾을 수 없습니다."));
-        // 트랜잭션 내부이므로 findUser 객체는 1차캐시에 담겼을 것.
-        // 실제로 이 지점에서 userRepository.findById(findUser.getId()) 수행해도 추가 쿼리 없음.
-        // findUser 엔티티가 1차캐시에 있다는 것을 의미함
-//        userRepository.findById(findUser.getId());
 
-        // 상품들 제거하는 쿼리가 몇 번 나가는지 보기
-        // 아마 findUser 에서 id 값을 얻어서
-        // delete from items where item.user_id = :user_id 이런 식으로 한 번만 나가지 않을까
-        // 지워야 할 아이템이 여러 건이면 in 절로 하면 좋지 않을까
-        // 근데 그보다 가장 좋은 건 user_id 를 가지고 delete 에서 user_id 를 조건으로 해서 한 번에 없애는 게 베스트일듯. 쿼리 한 번이니까
-        // select ~ from items where i.user_id=? 으로 지워야 할 item id 값들을 얻고나서
-        // 그리고 하나씩 delete from items where id=?
-        // 즉, item 을 3개 지운다면 select + 3 delete => 4 query
-        log.info("deleteBySeller() start");
-        itemRepository.deleteBySeller(findUser);
-        log.info("deleteBySeller() end");
+        itemRepository.deleteAllInBatch(findUser.getSellingItems());
+//        myBatisItemRepository.deleteBySeller(findUser.getId());
+//        log.info("findUser.getSellingItems().size()={}",findUser.getSellingItems().size());
+//        itemRepository.deleteAllBySeller(findUser);
+//        itemRepository.deleteBySeller(findUser);
+//        findUser.getSellingItems().clear();
+//        em.flush();
 
-        // 1차캐시에 있는 엔티티를 파라미터로 넣은 덕분인지 여기서는 user 찾는 쿼리가 안 나갔다.
-        userRepository.delete(findUser);
+        // findUser 가 1차캐시에 있어서 user 찾는 쿼리가 안 나간다.
+//        userRepository.delete(findUser);
+        userRepository.deleteAllInBatch(List.of(findUser));
     }
 
 
