@@ -7,6 +7,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -27,11 +29,19 @@ public class DefaultSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
+                .authorizeHttpRequests(request -> request
+                        .requestMatchers("/", "/login", "/register").permitAll()
+                        .anyRequest().authenticated());
+
+        http
                 .csrf(csrf -> csrf.disable()); // REST api 서버이므로 csrf 비활성화 처리
 
         http
                 .httpBasic(basic -> basic.disable());
 
+        /**
+         * 세션처리가 되지 않도록 함. 이 설정으로 세션에 인증정보가 저장되지 않음
+         */
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         http
@@ -71,4 +81,11 @@ public class DefaultSecurityConfig {
 
         return source;
     }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
+
+
 }

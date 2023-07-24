@@ -154,6 +154,7 @@ public class UserServiceTest {
         itemService.register(itemDto3);
 
         // when
+        log.info("deleteUser() start");
         userService.deleteUser(userJoinRequest.getEmail());
         log.info("deleteUser() end");
         // then

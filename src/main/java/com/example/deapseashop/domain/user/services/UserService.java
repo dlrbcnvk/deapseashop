@@ -50,11 +50,11 @@ public class UserService {
 
     @Transactional
     public void deleteUser(String email) {
-        log.info("deleteUser() start");
         UserEntity findUser = userRepository.findByEmail(email).orElseThrow(
                 () -> new UserNotFoundException("회원을 찾을 수 없습니다."));
 
         itemRepository.deleteAllInBatch(findUser.getSellingItems());
+        em.flush();
 //        myBatisItemRepository.deleteBySeller(findUser.getId());
 //        log.info("findUser.getSellingItems().size()={}",findUser.getSellingItems().size());
 //        itemRepository.deleteAllBySeller(findUser);
@@ -62,9 +62,15 @@ public class UserService {
 //        findUser.getSellingItems().clear();
 //        em.flush();
 
+        findUser = userRepository.findByEmail(findUser.getEmail()).orElseThrow();
+        log.info("userRepository.delete() start");
+        userRepository.delete(findUser);
+//        userRepository.deleteById(findUser.getId());
+
+
         // findUser 가 1차캐시에 있어서 user 찾는 쿼리가 안 나간다.
-//        userRepository.delete(findUser);
-        userRepository.deleteAllInBatch(List.of(findUser));
+//        userRepository.deleteAllInBatch(List.of(findUser));
+        log.info("userRepository.delete() end");
     }
 
 
