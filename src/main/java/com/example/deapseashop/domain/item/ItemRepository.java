@@ -2,8 +2,10 @@ package com.example.deapseashop.domain.item;
 
 import com.example.deapseashop.domain.user.entities.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,5 +36,17 @@ public interface ItemRepository extends JpaRepository<ItemEntity, Long> {
 
     public void deleteAllBySeller(UserEntity user);
 
+    /**
+     * 논리 삭제 (update 쿼리, deleted_at=now())
+     */
+    @Modifying
+    @Query("update ItemEntity i set i.deletedAt = now() where i.id in :ids")
+    void deleteBySoftDeleteSetDeletedAt(List<Long> ids);
 
+    /**
+     * 물리 삭제 (delete 쿼리)
+     */
+    @Modifying
+    @Query("delete from ItemEntity i where i.id in :ids")
+    void deleteByHardDelete(List<Long> ids);
 }

@@ -1,5 +1,6 @@
 package com.example.deapseashop.domain.user.services;
 
+import com.example.deapseashop.domain.item.ItemEntity;
 import com.example.deapseashop.domain.item.ItemRepository;
 import com.example.deapseashop.domain.user.dtos.UserJoinRequest;
 import com.example.deapseashop.domain.user.entities.UserEntity;
@@ -16,7 +17,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -53,23 +56,47 @@ public class UserService {
         UserEntity findUser = userRepository.findByEmail(email).orElseThrow(
                 () -> new UserNotFoundException("회원을 찾을 수 없습니다."));
 
-        itemRepository.deleteAllInBatch(findUser.getSellingItems());
-        em.flush();
+//        itemRepository.deleteAllInBatch(findUser.getSellingItems());
+        itemRepository.deleteByHardDelete(
+                findUser.getSellingItems().stream().map(ItemEntity::getId).collect(Collectors.toList()));
+        // 변경감지 이용
+        // 이 코드는 작동 안 함
+//        findUser.getSellingItems().clear();
+
+
 //        myBatisItemRepository.deleteBySeller(findUser.getId());
 //        log.info("findUser.getSellingItems().size()={}",findUser.getSellingItems().size());
 //        itemRepository.deleteAllBySeller(findUser);
 //        itemRepository.deleteBySeller(findUser);
 //        findUser.getSellingItems().clear();
+//        em.persist(findUser);
 //        em.flush();
-
-        findUser = userRepository.findByEmail(findUser.getEmail()).orElseThrow();
+//        em.clear();
+//        log.info("em.clear()");
+//        findUser = userRepository.findByEmail(findUser.getEmail()).orElseThrow();
         log.info("userRepository.delete() start");
-        userRepository.delete(findUser);
+//        userRepository.delete(findUser);
 //        userRepository.deleteById(findUser.getId());
 
 
         // findUser 가 1차캐시에 있어서 user 찾는 쿼리가 안 나간다.
-//        userRepository.deleteAllInBatch(List.of(findUser));
+        userRepository.deleteAllInBatch(List.of(findUser));
+        log.info("userRepository.delete() end");
+    }
+
+    @Transactional
+    public void deleteUserLogical(String email) {
+        UserEntity findUser = userRepository.findByEmail(email).orElseThrow(
+                () -> new UserNotFoundException("회원을 찾을 수 없습니다."));
+
+        itemRepository.deleteBySoftDeleteSetDeletedAt(
+                findUser.getSellingItems().stream().map(ItemEntity::getId).collect(Collectors.toList())
+        );
+
+        log.info("userRepository.delete() start");
+
+        // findUser 가 1차캐시에 있어서 user 찾는 쿼리가 안 나간다.
+        userRepository.deleteBySetDeletedAt(findUser.getId());
         log.info("userRepository.delete() end");
     }
 
