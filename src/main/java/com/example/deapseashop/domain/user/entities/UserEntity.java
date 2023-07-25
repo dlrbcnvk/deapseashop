@@ -6,6 +6,7 @@ import com.example.deapseashop.domain.global.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
@@ -40,7 +41,8 @@ public class UserEntity extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     private UserRole userRole;
 
-    @OneToMany(mappedBy = "seller", fetch = FetchType.LAZY)
+    @Setter
+    @OneToMany(mappedBy = "seller", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<ItemEntity> sellingItems = new ArrayList<>();
 
     public UserEntity() { }

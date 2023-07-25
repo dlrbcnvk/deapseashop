@@ -24,4 +24,8 @@ public class BaseEntity {
     @Column(name = "updated_at")
     @Setter
     protected LocalDateTime updatedAt;
+
+    @Column(name = "deleted_at")
+    @Setter
+    protected LocalDateTime deletedAt = null;
 }

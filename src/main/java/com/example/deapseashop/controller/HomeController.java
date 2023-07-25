@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class HomeController {
 
-    private final UserService userService;
     private final ItemService itemService;
 
     @GetMapping("/")
